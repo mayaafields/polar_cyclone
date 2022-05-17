@@ -3,7 +3,8 @@ from pylab import *
 from netCDF4 import Dataset
 
 # Retrieving Data from the nc files
-data = Dataset('/home/mafields/CylconeDiagnostics/data/jupiter2d-long-main.nc')
+fname = '/home/mafields/CylconeDiagnostics/data/jupiter2d-long-main.nc'
+data = Dataset(fname, 'r')
 
 # Defining Variables
 time = data['time']
