@@ -43,13 +43,18 @@ temp_variations = temp - t_0.reshape((1,nx1,1))
 # NH3 Variations
 
 NH3avg = mean(NH3_total, axis = (0,2))
-print(NH3_total.shape, NH3avg.shape)
 NH3_variations = NH3_total - NH3avg.reshape((1,nx1,1))
+
+NH3_0 = NH3_total[0,:,0]
+NH3_variations_from_initial = NH3_total - NH3_0.reshape((1,nx1,1))
+
 
 #H2O Variations
 
-H2Oavg = mean(H2O_total, axis = (0,2))
+H2O_0 = H2O_total[0,:,0]
+H2O_variations_from_initial = H2O_total - H2O_0.reshape((1,nx1,1))
 
+H2Oavg = mean(H2O_total, axis = (0,2))
 H2O_variations = H2O_total - H2Oavg.reshape((1,nx1,1))
 
 # Plotting 2D contour plots for ammonia and water vapor
@@ -59,37 +64,36 @@ Pressure, Time = meshgrid(pavg,time)
 
 fig,ax=subplots(1,1)
 
-contour_plot_temp_var = ax.contourf(Time, Pressure, sum(temp_variations, axis =2))
+contour_plot_temp_var = ax.contourf(Time, Pressure, mean(temp_variations, axis =2))
 title(r'Temperature Variations')
 ax.set_xlabel(r'Time(s)',fontsize = 12)
 ax.set_ylabel(r'Pressure',fontsize = 12)
-ax.set_ylim(max(pavg), min(pavg))
+ax.set_ylim(max(pavg), 10**6)
 ax.set_yscale('log')
 fig.colorbar(contour_plot_temp_var)
-savefig('contour_plot_temp.png')
+savefig('contour_plot_temp_deep.png')
 
 fig,ax=subplots(1,1)
 
-contour_plot_H2O = ax.contourf(Time, Pressure, sum(H2O_variations, axis = 2))
+contour_plot_H2O = ax.contourf(Time, Pressure, sum(H2O_variations_from_initial, axis = 2))
 title(r'$H_2O$ Concentration')
 ax.set_xlabel(r'Time(s)',fontsize = 12)
 ax.set_ylabel(r'Pressure',fontsize = 12)
-ax.set_ylim(max(pavg), min(pavg))
+ax.set_ylim(max(pavg), 10**6)
 ax.set_yscale('log')
 fig.colorbar(contour_plot_H2O)
-savefig('contour_plot_H2O.png')
+savefig('contour_plot_H2O_deep.png')
 
 fig,ax=subplots(1,1)
 
-contour_plot_NH3 = ax.contourf(Time, Pressure, sum(NH3_variations, axis = 2))
+contour_plot_NH3 = ax.contourf(Time, Pressure, sum(NH3_variations_from_initial, axis = 2))
 title(r'$NH_3$ Concentration')
 ax.set_xlabel(r'Time(s)',fontsize = 12)
 ax.set_ylabel(r'Pressure',fontsize = 12)
-ax.set_ylim(max(pavg), min(pavg))
+ax.set_ylim(max(pavg), 10**6)
 ax.set_yscale('log')
 fig.colorbar(contour_plot_NH3)
-savefig('contour_plot_NH3.png')
-
+savefig('contour_plot_NH3_deep.png')
 
 fig,ax=subplots(1,1)
 contour_plot_KE = ax.contourf(Time, Pressure, kinetic_energy[:,:,0])
@@ -100,4 +104,11 @@ ax.set_ylim(max(pavg), min(pavg))
 ax.set_yscale('log')
 fig.colorbar(contour_plot_KE)
 savefig('contour_plot_KE.png')
+
+
+#Gradient Plots with respect to time
+
+grad_NH3 = gradient(NH3_variations_from_initial)
+print(grad_NH3)
+
 show()
