@@ -1,7 +1,5 @@
 #Mass Budget Python Script
 
-
-
 #! /usr/bin/env python3
 from pylab import *
 from netCDF4 import Dataset
@@ -73,11 +71,7 @@ ax.set_ylabel(r'$\rho$',fontsize = 12)
 legend()
 savefig('linfits_of_density_timeseries.png',bbox_inches= 'tight')
 
-
-#rho_0 = rho[0,:,0]
-#density_variations = rho - rho_0.reshape((1,nx1,1))
-#rhoa_avg = mean(density_variations, axis =2)
-
+##Old Method
 
 #Plotting Density Variations
 
