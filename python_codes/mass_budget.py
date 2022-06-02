@@ -3,6 +3,7 @@
 #! /usr/bin/env python3
 from pylab import *
 from netCDF4 import Dataset
+from scipy.ndimage.filters import uniform_filter1d
 
 # Retrieving Data from the nc files
 fname = '/home/mafields/CylconeDiagnostics/data/jupiter2d-long-main.nc'
@@ -16,6 +17,7 @@ mass_flux = data['v1rho'][:,:]
 ntime, nx1, nx2 = rho.shape
 
 rho_avg = mean(rho, axis = (2))
+p_avg = mean(pres, axis = (0,2))
 
 #mental check to find the time with no convection
 deltime1 = time[280]
@@ -58,10 +60,12 @@ for i in range(nx1):
 z = arange(0,48,1)
 
 fig,ax=subplots(1,1)
-plot(beta,z)
+plot(beta,p_avg)
 title(r'$\frac{\delta \rho}{\delta t}$')
 ax.set_xlabel(r'$\frac{\delta \rho}{\delta t}$',fontsize = 12)
-ax.set_ylabel('z',fontsize = 12)
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(p_avg),min(p_avg))
 savefig('noconvec_density_variation.png',bbox_inches= 'tight')
 
 #Coefficents
@@ -85,20 +89,41 @@ mass_flux_avg = mean(mass_flux_nc, axis = 0)
 print(mass_flux_avg)
 
 fig,ax= subplots(1,1)
-plot(mass_flux_avg,z)
+plot(mass_flux_avg, p_avg)
 title(r'$(w \rho)$')
-ax.set_ylabel('z',fontsize = 12)
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_xlabel(r'Mass Flux ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(p_avg),min(p_avg))
 savefig('mass_flux_nc.png', bbox_inches = 'tight')
 
 
 fig,ax= subplots(1,1)
-plot(mass_flux_avg,z, label = r'$(w \rho)$')
-plot(beta,z ,label = r'$ \frac{\delta \rho}{\delta t}$')
-ax.set_ylabel('z',fontsize = 12)
-#ax.set_xlabel(r'Mass Flux ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+plot(mass_flux_avg,p_avg, label = r'$(w \rho)$')
+plot(beta,p_avg,label = r'$ \frac{\delta \rho}{\delta t}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(p_avg),min(p_avg))
 legend()
 savefig('mf_rhovar_nc.png', bbox_inches = 'tight')
+
+
+
+#Moving Average of Mass Flux
+N = 5
+moving_average_mf = uniform_filter1d(mass_flux_nc, size=N)
+print(moving_average_mf.shape)
+moving_average_mf_gradz = mean(moving_average_mf, axis =0)
+
+
+fig,ax= subplots(1,1)
+plot(moving_average_mf_gradz,p_avg, label = r'$(w \rho)$')
+plot(beta,p_avg,label = r'$ \frac{\delta \rho}{\delta t}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(p_avg),min(p_avg))
+legend()
+savefig('mfmovingavg_rhovar_nc.png', bbox_inches = 'tight')
 
 
 #Plotting the Heating Rate due to condensation? 
