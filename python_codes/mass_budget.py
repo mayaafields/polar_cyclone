@@ -114,13 +114,19 @@ savefig('mf_rhovar_nc.png', bbox_inches = 'tight')
 
 #Moving Average of Mass Flux
 N = 5
-moving_average_mf = uniform_filter1d(mass_flux_nc, size=N)
-print(moving_average_mf.shape)
-moving_average_mf_gradz = mean(moving_average_mf, axis =0)
+moving_average = uniform_filter1d(mass_flux_nc, size=N)
+moving_average_mf = mean(moving_average, axis =0)
+movavg_mf_gradz = np.zeros(len(moving_average_mf))
+for i in range(len(moving_average_mf)-1): 
+    movavg_mf_gradz[i] = (moving_average_mf[i+1] - moving_average_mf[i])/(p_avg[i+1] - p_avg[i])
+
+
+
+
 
 
 fig,ax= subplots(1,1)
-plot(moving_average_mf_gradz,p_avg, label = r'$(w \rho)$')
+plot(movavg_mf_gradz,p_avg, label = r'$\frac{d(w \rho)}{dz}$')
 plot(beta,p_avg,label = r'$ \frac{\delta \rho}{\delta t}$')
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_yscale('log')
