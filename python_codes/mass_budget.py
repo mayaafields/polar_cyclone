@@ -15,124 +15,110 @@ rho = data['rho'][:,:,:,0]
 pres = data['press'][:,:,:,0]
 mass_flux = data['v1rho'][:,:]
 ntime, nx1, nx2 = rho.shape
-
+x1 = data['x1']
+x2 = data['x2']
 rho_avg = mean(rho, axis = (2))
-p_avg = mean(pres, axis = (0,2))
+pres_avg = mean(pres, axis = (0,2))
 
-#mental check to find the time with no convection
-deltime1 = time[280]
-deltime2 = time[500]
-print(deltime1, deltime2)
+#Time Periods determined by visually identifying convection anomalies
+#Period before 1st convection event
+t1s = 0
+t1e = 270
+
+#Period inbetween convection events
+t2s = 280
+t2e = 500
+
+#Period after 2nd convection event
+t3s = 510
+t3e = 800
 
 #Defining time with no convection
-time_nc = time[280:500] # time inbetween convection events
-
-#Creating density @ one pressure level to test method
-rho_lev1 = rho_avg[:,0] #170 bar
-rho_lev1_nc = rho_lev1[280:500]
-
-# Plotting 1D density versus time 
-fig,ax=subplots(1,1)
-
-#Full timeseries 
-plot(time, rho_lev1, label = 'level 1 (170 bar)')
-title(r'Density versus Time')
-ax.set_xlabel(r'Time(s)',fontsize = 12)
-ax.set_ylabel(r'$\rho$',fontsize = 12)
-legend()
-savefig('density_timeseries.png',bbox_inches= 'tight')
-
-#Cut timeseries inbetween convection events
-fig,ax=subplots(1,1)
-
-plot(time_nc, rho_lev1_nc, label = 'level 1 (170 bar)')
-title(r'Density versus Time')
-ax.set_xlabel(r'Time(s)',fontsize = 12)
-ax.set_ylabel(r'$\rho$',fontsize = 12)
-legend()
-savefig('noconvec_density_timeseries.png',bbox_inches= 'tight')
+t1 = time[t1s:t1e]
+t2 = time[t2s:t2e]
+t3 = time[t3s:t3e]
 
 #Linear Fits
-beta = np.zeros(48)
+beta1 = np.zeros(48)
+beta2 = np.zeros(48)
+beta3 = np.zeros(48)
 for i in range(nx1):
-    rho_level = rho_avg[:,i]
-    rho_level_nc = rho_level[280:500]
-    linfit = polyfit(time_nc, rho_level_nc,1)
-    beta[i] = linfit[0] #beta is an array of d\rho/dt values for each pressure level
+    rho = rho_avg[:,i]
+    rho1 = rho[t1s:t1e]
+    rho2 = rho[t2s:t2e]
+    rho3 = rho[t3s:t3e]
+    linfit1 = polyfit(t1,rho1,1)
+    linfit2 = polyfit(t2,rho2,1)
+    linfit3 = polyfit(t3,rho3,1)
+    #beta is an array of d\rho/dt values for each pressure level
+    beta1[i] = linfit1[0]
+    beta2[i] = linfit2[0]
+    beta3[i] = linfit3[0]
 
 #d\rho/dt plot 
 fig,ax=subplots(1,1)
-plot(beta,p_avg)
-title(r'$\frac{\delta \rho}{\delta t}$')
-ax.set_xlabel(r'$\frac{\delta \rho}{\delta t}$',fontsize = 12)
+plot(beta1,pres_avg, label = r'$\frac{d(\rho)_1}{dt}$')
+plot(beta2,pres_avg, label = r'$\frac{d(\rho)_2}{dt}$')
+plot(beta3,pres_avg, label = r'$\frac{d(\rho)_3}{dt}$')
+title(r'$\frac{d\rho}{dt}$')
+ax.set_xlabel(r'$\frac{d\rho}{dt}$',fontsize = 12)
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_yscale('log')
-ax.set_ylim(max(p_avg),min(p_avg))
-savefig('noconvec_density_variation.png',bbox_inches= 'tight')
-
-#Coefficents from linear fit
-lev1_linfit = polyfit(time_nc,rho_lev1_nc,1)
-
-#Lines
-y1 = lev1_linfit[0]*time_nc + lev1_linfit[1]
-
-fig,ax = subplots(1,1)
-
-#Linear fit of just one pressure level
-plot(time_nc, y1, label = 'level 1 (170 bar)')
-title(r'Linear Fits of Density versus Time')
-ax.set_xlabel(r'Time(s)',fontsize = 12)
-ax.set_ylabel(r'$\rho$',fontsize = 12)
+ax.set_ylim(max(pres_avg),min(pres_avg))
+ax.set_xlim(-0.5e-9,0.5e-9)
 legend()
-savefig('linfits_of_density_timeseries.png',bbox_inches= 'tight')
+savefig('drhodt.png',bbox_inches= 'tight')
 
-#Plotting the Vertical Mass Flux
-mass_flux_nc = mass_flux[280:500,:]
-mass_flux_avg = mean(mass_flux_nc, axis = 0)
-print(mass_flux_avg)
+#Defining the Vertical Mass Flux per time period
+mass_flux1 = mass_flux[t1s:t1e,:]
+mass_flux1_avg = mean(mass_flux1, axis = 0)
 
+mass_flux2 = mass_flux[t2s:t2e,:]
+mass_flux2_avg = mean(mass_flux2, axis = 0)
+
+mass_flux3 = mass_flux[t3s:t3e,:]
+mass_flux3_avg = mean(mass_flux3, axis = 0)
+
+#plotting the vertical mass flux
 fig,ax= subplots(1,1)
-plot(mass_flux_avg, p_avg)
+plot(mass_flux1_avg, pres_avg, label = r'$(w\rho)_1$')
+plot(mass_flux2_avg, pres_avg, label = r'$(w\rho)_2$')
+plot(mass_flux3_avg, pres_avg, label = r'$(w\rho)_3$')
 title(r'$(w \rho)$')
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_xlabel(r'Mass Flux ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
 ax.set_yscale('log')
-ax.set_ylim(max(p_avg),min(p_avg))
-savefig('mass_flux_nc.png', bbox_inches = 'tight')
-
-#Comparison to d\rho/dt
-fig,ax= subplots(1,1)
-plot(mass_flux_avg,p_avg, label = r'$(w \rho)$')
-plot(beta,p_avg,label = r'$ \frac{\delta \rho}{\delta t}$')
-ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
-ax.set_yscale('log')
-ax.set_ylim(max(p_avg),min(p_avg))
-legend()
-savefig('mf_rhovar_nc.png', bbox_inches = 'tight')
-
-
+ax.set_ylim(max(pres_avg),min(pres_avg))
+savefig('mass_flux.png', bbox_inches = 'tight')
 
 #Moving Average of Mass Flux
-N = 5
-moving_average = uniform_filter1d(mass_flux_nc, size=N)
-moving_average_mf = mean(moving_average, axis =0)
-movavg_mf_gradz = np.zeros(len(moving_average_mf))
-for i in range(len(moving_average_mf)-1): 
-    movavg_mf_gradz[i] = (moving_average_mf[i+1] - moving_average_mf[i])/(p_avg[i+1] - p_avg[i])
+N = 5 #5 point moving average
 
+mass_flux1 = uniform_filter1d(mass_flux1, size=N)
+mass_flux1_avg = mean(mass_flux1, axis =0)
+dwrhodz1 = (mass_flux1_avg[1:] - mass_flux1_avg[:-1])/(x1[1:] - x1[:-1])
 
+mass_flux2 = uniform_filter1d(mass_flux2, size=N)
+mass_flux2_avg = mean(mass_flux2, axis =0)
+dwrhodz2 = (mass_flux2_avg[1:] - mass_flux2_avg[:-1])/(x1[1:] - x1[:-1])
 
+mass_flux3 = uniform_filter1d(mass_flux3, size=N)
+mass_flux3_avg = mean(mass_flux3, axis =0)
+dwrhodz3 = (mass_flux3_avg[1:] - mass_flux3_avg[:-1])/(x1[1:] - x1[:-1])
 
-
+pres_avg = sqrt(pres_avg[:1]*pres_avg[:-1])
 
 fig,ax= subplots(1,1)
-plot(movavg_mf_gradz,p_avg, label = r'$\frac{d(w \rho)}{dz}$')
-plot(beta,p_avg,label = r'$ \frac{\delta \rho}{\delta t}$')
+plot(-1*dwrhodz1,pres_avg,label = r'$\frac{-d(w \rho)_1}{dz}$')
+plot(-1*dwrhodz2,pres_avg,label = r'$\frac{-d(w \rho)_2}{dz}$')
+plot(-1*dwrhodz3,pres_avg,label = r'$\frac{-d(w \rho)_3}{dz}$')
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_yscale('log')
-ax.set_ylim(max(p_avg),min(p_avg))
+ax.set_ylim(max(pres_avg),min(pres_avg))
+ax.set_xlim(-0.5e-9,0.5e-9)
+axvline(x = 0, linestyle = '--', color = 'black')
 legend()
-savefig('mfmovingavg_rhovar_nc.png', bbox_inches = 'tight')
+savefig('dwrhodt_mvavg.png', bbox_inches = 'tight')
 
 
 show()
