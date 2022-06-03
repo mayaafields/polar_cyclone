@@ -60,7 +60,6 @@ fig,ax=subplots(1,1)
 plot(beta1,pres_avg, label = r'$\frac{d(\rho)_1}{dt}$')
 plot(beta2,pres_avg, label = r'$\frac{d(\rho)_2}{dt}$')
 plot(beta3,pres_avg, label = r'$\frac{d(\rho)_3}{dt}$')
-title(r'$\frac{d\rho}{dt}$')
 ax.set_xlabel(r'$\frac{d\rho}{dt}$',fontsize = 12)
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_yscale('log')
@@ -84,11 +83,11 @@ fig,ax= subplots(1,1)
 plot(mass_flux1_avg, pres_avg, label = r'$(w\rho)_1$')
 plot(mass_flux2_avg, pres_avg, label = r'$(w\rho)_2$')
 plot(mass_flux3_avg, pres_avg, label = r'$(w\rho)_3$')
-title(r'$(w \rho)$')
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_xlabel(r'Mass Flux ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
 ax.set_yscale('log')
 ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
 savefig('mass_flux.png', bbox_inches = 'tight')
 
 #Moving Average of Mass Flux
@@ -96,18 +95,30 @@ N = 5 #5 point moving average
 
 mass_flux1 = uniform_filter1d(mass_flux1, size=N)
 mass_flux1_avg = mean(mass_flux1, axis =0)
-dwrhodz1 = (mass_flux1_avg[1:] - mass_flux1_avg[:-1])/(x1[1:] - x1[:-1])
+dwrhodz1 = (mass_flux1_avg[:-1] - mass_flux1_avg[1:])/(x1[:-1] - x1[1:])
 
 mass_flux2 = uniform_filter1d(mass_flux2, size=N)
 mass_flux2_avg = mean(mass_flux2, axis =0)
-dwrhodz2 = (mass_flux2_avg[1:] - mass_flux2_avg[:-1])/(x1[1:] - x1[:-1])
+dwrhodz2 = (mass_flux2_avg[:-1] - mass_flux2_avg[1:])/(x1[:-1] - x1[1:])
 
 mass_flux3 = uniform_filter1d(mass_flux3, size=N)
 mass_flux3_avg = mean(mass_flux3, axis =0)
-dwrhodz3 = (mass_flux3_avg[1:] - mass_flux3_avg[:-1])/(x1[1:] - x1[:-1])
+dwrhodz3 = (mass_flux3_avg[:-1] - mass_flux3_avg[1:])/(x1[-1:] - x1[1:])
+
+
+#plotting the vertical mass flux
+fig,ax= subplots(1,1)
+plot(mass_flux1_avg, pres_avg, label = r'$(w\rho)_1$')
+plot(mass_flux2_avg, pres_avg, label = r'$(w\rho)_2$')
+plot(mass_flux3_avg, pres_avg, label = r'$(w\rho)_3$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_mvavg.png', bbox_inches = 'tight')
 
 pres_avg = sqrt(pres_avg[:1]*pres_avg[:-1])
-
 fig,ax= subplots(1,1)
 plot(-1*dwrhodz1,pres_avg,label = r'$\frac{-d(w \rho)_1}{dz}$')
 plot(-1*dwrhodz2,pres_avg,label = r'$\frac{-d(w \rho)_2}{dz}$')
