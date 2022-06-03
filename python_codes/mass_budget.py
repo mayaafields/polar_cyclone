@@ -39,9 +39,9 @@ t2 = time[t2s:t2e]
 t3 = time[t3s:t3e]
 
 #Linear Fits
-beta1 = np.zeros(48)
-beta2 = np.zeros(48)
-beta3 = np.zeros(48)
+beta1 = np.zeros(len(x1))
+beta2 = np.zeros(len(x1))
+beta3 = np.zeros(len(x1))
 for i in range(nx1):
     rho = rho_avg[:,i]
     rho1 = rho[t1s:t1e]
@@ -93,17 +93,14 @@ savefig('mass_flux.png', bbox_inches = 'tight')
 #Moving Average of Mass Flux
 N = 5 #5 point moving average
 
-mass_flux1 = uniform_filter1d(mass_flux1, size=N)
-mass_flux1_avg = mean(mass_flux1, axis =0)
+mass_flux1_avg = uniform_filter1d(mass_flux1_avg, size=N)
 dwrhodz1 = (mass_flux1_avg[:-1] - mass_flux1_avg[1:])/(x1[:-1] - x1[1:])
 
-mass_flux2 = uniform_filter1d(mass_flux2, size=N)
-mass_flux2_avg = mean(mass_flux2, axis =0)
+mass_flux2_avg = uniform_filter1d(mass_flux2_avg, size=N)
 dwrhodz2 = (mass_flux2_avg[:-1] - mass_flux2_avg[1:])/(x1[:-1] - x1[1:])
 
-mass_flux3 = uniform_filter1d(mass_flux3, size=N)
-mass_flux3_avg = mean(mass_flux3, axis =0)
-dwrhodz3 = (mass_flux3_avg[:-1] - mass_flux3_avg[1:])/(x1[-1:] - x1[1:])
+mass_flux3_avg = uniform_filter1d(mass_flux3_avg, size=N)
+dwrhodz3 = (mass_flux3_avg[:-1] - mass_flux3_avg[1:])/(x1[:-1] - x1[1:])
 
 
 #plotting the vertical mass flux
@@ -118,18 +115,31 @@ ax.set_ylim(max(pres_avg),min(pres_avg))
 legend()
 savefig('mass_flux_mvavg.png', bbox_inches = 'tight')
 
-pres_avg = sqrt(pres_avg[:1]*pres_avg[:-1])
+pres_avg2 = sqrt(pres_avg[:1]*pres_avg[:-1])
 fig,ax= subplots(1,1)
-plot(-1*dwrhodz1,pres_avg,label = r'$\frac{-d(w \rho)_1}{dz}$')
-plot(-1*dwrhodz2,pres_avg,label = r'$\frac{-d(w \rho)_2}{dz}$')
-plot(-1*dwrhodz3,pres_avg,label = r'$\frac{-d(w \rho)_3}{dz}$')
+plot(-1*dwrhodz1,pres_avg2,label = r'$\frac{-d(w \rho)_1}{dz}$')
+plot(-1*dwrhodz2,pres_avg2,label = r'$\frac{-d(w \rho)_2}{dz}$')
+plot(-1*dwrhodz3,pres_avg2,label = r'$\frac{-d(w \rho)_3}{dz}$')
 ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
 ax.set_yscale('log')
-ax.set_ylim(max(pres_avg),min(pres_avg))
-ax.set_xlim(-0.5e-9,0.5e-9)
+ax.set_ylim(max(pres_avg2),min(pres_avg2))
 axvline(x = 0, linestyle = '--', color = 'black')
 legend()
 savefig('dwrhodt_mvavg.png', bbox_inches = 'tight')
+
+fig,ax= subplots(1,1)
+plot(-1*dwrhodz1,pres_avg2,label = r'$\frac{-d(w \rho)_1}{dz}$')
+plot(-1*dwrhodz2,pres_avg2,label = r'$\frac{-d(w \rho)_2}{dz}$')
+plot(-1*dwrhodz3,pres_avg2,label = r'$\frac{-d(w \rho)_3}{dz}$')
+plot(beta1,pres_avg, label = r'$\frac{d(\rho)_1}{dt}$')
+plot(beta2,pres_avg, label = r'$\frac{d(\rho)_2}{dt}$')
+plot(beta3,pres_avg, label = r'$\frac{d(\rho)_3}{dt}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwrhodt_mvavg_compare.png', bbox_inches = 'tight')
 
 
 show()
