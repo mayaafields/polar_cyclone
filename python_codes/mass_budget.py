@@ -115,7 +115,8 @@ ax.set_ylim(max(pres_avg),min(pres_avg))
 legend()
 savefig('mass_flux_mvavg.png', bbox_inches = 'tight')
 
-pres_avg2 = sqrt(pres_avg[:1]*pres_avg[:-1])
+pres_avg2 = sqrt(pres_avg[1:]*pres_avg[:-1])
+
 fig,ax= subplots(1,1)
 plot(-1*dwrhodz1,pres_avg2,label = r'$\frac{-d(w \rho)_1}{dz}$')
 plot(-1*dwrhodz2,pres_avg2,label = r'$\frac{-d(w \rho)_2}{dz}$')
