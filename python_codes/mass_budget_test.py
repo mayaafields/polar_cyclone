@@ -16,15 +16,12 @@ time = data['time']
 rho = data['rho'][:,:,:,0]
 pres = data['press'][:,:,:,0]
 mass_flux = data['v1rho'][:,:]
-mass_flux_qH2O = data['v1q1']
-mass_flux_qNH3 = data['v1q2']
+w = data['vel1'][:,:,:,0]
 ntime, nx1, nx2 = rho.shape
 x1 = data['x1']
 x2 = data['x2']
 rho_avg = mean(rho, axis = (2))
 pres_avg = mean(pres, axis = (0,2))
-
-print(mass_flux_qH2O.shape, mass_flux_qNH3.shape)
 
 #Solving For the qNH3 and qH20 for the advective equation
 qH2Ov = data['vapor1'][:,:,:,0]
@@ -42,8 +39,15 @@ dry_air = rho - (rhoNH3v + rhoH2Ov)
 qH2O = rhoH2Ov + qH2Oc + qH2Op
 qNH3 = rhoNH3v + qNH3c + qNH3p
 
+mass_flux_qH2O = w*qH2O
+mass_flux_qNH3 = w*qNH3
+
+mass_flux_qH2O_avg = mean(mass_flux_qH2O, axis = (2))
+mass_flux_qNH3_avg = mean(mass_flux_qNH3, axis = (2))
 qH2O_avg = mean(qH2O, axis = (2))
 qNH3_avg = mean(qNH3, axis = (2))
+
+print(mass_flux_qH2O_avg.shape)
 
 qH2O_lev1 = qH2O_avg[:,0]
 qNH3_lev1 = qNH3_avg[:,0]
@@ -51,10 +55,12 @@ qNH3_lev1 = qNH3_avg[:,0]
 fig,ax = subplots(1,1)
 plot(time, qH2O_lev1, label = 'level 1 (170 bar) H2O')
 legend()
+close()
 
 fig,ax = subplots(1,1)
 plot(time, qNH3_lev1, label = 'level 1 (170 bar) NH3') 
 legend()
+close()
 
 #Looking at density spikes in the atmosphere (possible convection events)
 rho_lev1 = rho_avg[:,0]
@@ -68,6 +74,7 @@ title(r'Density versus Time')
 ax.set_xlabel(r'Time(s)',fontsize = 12)
 ax.set_ylabel(r'$\rho$',fontsize = 12)
 legend()
+close()
 
 #Time Periods determined by visually identifying convection anomalies
 #Period before 1st convection event
@@ -191,6 +198,7 @@ ax.set_ylim(max(pres_avg),min(pres_avg))
 ax.set_xlim(-0.5e-9,0.5e-9)
 legend()
 savefig('drhodt.png',bbox_inches= 'tight')
+close()
 
 #d qH2O/dt plot
 fig,ax=subplots(1,1)
@@ -203,7 +211,7 @@ ax.set_yscale('log')
 ax.set_ylim(max(pres_avg),min(pres_avg))
 ax.set_xlim(-0.5e-9,0.5e-9)
 legend()
-savefig('dzh2Odt.png',bbox_inches= 'tight')
+savefig('dh2Odt.png',bbox_inches= 'tight')
 
 #d qNH3/dt plot
 fig,ax=subplots(1,1)
@@ -229,6 +237,7 @@ ax.set_ylim(max(pres_avg),min(pres_avg))
 #ax.set_xlim(-0.5e-9,0.5e-9)
 legend()
 savefig('drhodt_anomaly.png',bbox_inches= 'tight')
+close()
 
 #dH2O/dt anomaly plot
 fig,ax=subplots(1,1)
@@ -271,23 +280,39 @@ mass_flux5 = mass_flux[t5s:t5e,:]
 mass_flux5_avg = mean(mass_flux5, axis = 0)
 
 
-#Defining the Vertical Vapor Mass Flux per time period
-mass_flux1 = mass_flux[t1s:t1e,:]
-mass_flux1_avg = mean(mass_flux1, axis = 0)
+#Defining the Vertical H2O Mass Flux per time period
+mass_flux1_qH2O = mass_flux_qH2O_avg[t1s:t1e,:]
+mass_flux1_qH2O_avg = mean(mass_flux1_qH2O, axis = 0)
 
-mass_flux2 = mass_flux[t2s:t2e,:]
-mass_flux2_avg = mean(mass_flux2, axis = 0)
+mass_flux2_qH2O = mass_flux_qH2O_avg[t2s:t2e,:]
+mass_flux2_qH2O_avg = mean(mass_flux2_qH2O, axis = 0)
 
-mass_flux3 = mass_flux[t3s:t3e,:]
-mass_flux3_avg = mean(mass_flux3, axis = 0)
+mass_flux3_qH2O = mass_flux_qH2O_avg[t3s:t3e,:]
+mass_flux3_qH2O_avg = mean(mass_flux3_qH2O, axis = 0)
 
-mass_flux4 = mass_flux[t4s:t4e,:]
-mass_flux4_avg = mean(mass_flux4, axis = 0)
+mass_flux4_qH2O = mass_flux_qH2O_avg[t4s:t4e,:]
+mass_flux4_qH2O_avg = mean(mass_flux4_qH2O, axis = 0)
 
-mass_flux5 = mass_flux[t5s:t5e,:]
-mass_flux5_avg = mean(mass_flux5, axis = 0)
+mass_flux5_qH2O = mass_flux_qH2O_avg[t5s:t5e,:]
+mass_flux5_qH2O_avg = mean(mass_flux5_qH2O, axis = 0)
 
+#Defining the Vertical NH3 Mass Flux per time period
+mass_flux1_qNH3 = mass_flux_qNH3_avg[t1s:t1e,:]
+mass_flux1_qNH3_avg = mean(mass_flux1_qNH3, axis = 0)
 
+mass_flux2_qNH3 = mass_flux_qNH3_avg[t2s:t2e,:]
+mass_flux2_qNH3_avg = mean(mass_flux2_qNH3, axis = 0)
+
+mass_flux3_qNH3 = mass_flux_qNH3_avg[t3s:t3e,:]
+mass_flux3_qNH3_avg = mean(mass_flux3_qNH3, axis = 0)
+
+mass_flux4_qNH3 = mass_flux_qNH3_avg[t4s:t4e,:]
+mass_flux4_qNH3_avg = mean(mass_flux4_qNH3, axis = 0)
+
+mass_flux5_qNH3 = mass_flux_qNH3_avg[t5s:t5e,:]
+mass_flux5_qNH3_avg = mean(mass_flux5_qNH3, axis = 0)
+
+##Mass Flux (w\rho)
 #plotting the vertical mass flux
 fig,ax= subplots(1,1)
 plot(mass_flux1_avg, pres_avg, label = r'$(w\rho)_1$')
@@ -299,6 +324,7 @@ ax.set_yscale('log')
 ax.set_ylim(max(pres_avg),min(pres_avg))
 legend()
 savefig('mass_flux.png', bbox_inches = 'tight')
+close()
 
 #plotting the vertical mass flux anomalies
 fig,ax= subplots(1,1)
@@ -310,6 +336,59 @@ ax.set_yscale('log')
 ax.set_ylim(max(pres_avg),min(pres_avg))
 legend()
 savefig('mass_flux_anomaly.png', bbox_inches = 'tight')
+close()
+
+##Mass Flux (w*qH2O)
+#plotting the vertical mass flux
+fig,ax= subplots(1,1)
+plot(mass_flux1_qH2O_avg, pres_avg, label = r'$(w\rho)_1$')
+plot(mass_flux2_qH2O_avg, pres_avg, label = r'$(w\rho)_2$')
+plot(mass_flux3_qH2O_avg, pres_avg, label = r'$(w\rho)_3$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qH_2O$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_H2O.png', bbox_inches = 'tight')
+close()
+
+#plotting the vertical mass flux anomalies
+fig,ax= subplots(1,1)
+plot(mass_flux4_qH2O_avg, pres_avg, label = r'$(w\rho)_4$ 1st Anomaly')
+plot(mass_flux5_qH2O_avg, pres_avg, label = r'$(w\rho)_5$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qH_2O$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_qH2O_anomaly.png', bbox_inches = 'tight')
+close()
+
+##Mass Flux (w*qH2O)
+#plotting the vertical mass flux
+fig,ax= subplots(1,1)
+plot(mass_flux1_qNH3_avg, pres_avg, label = r'$(w\rho)_1$')
+plot(mass_flux2_qNH3_avg, pres_avg, label = r'$(w\rho)_2$')
+plot(mass_flux3_qNH3_avg, pres_avg, label = r'$(w\rho)_3$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qNH_3$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_NH3.png', bbox_inches = 'tight')
+close()
+
+#plotting the vertical mass flux anomalies
+fig,ax= subplots(1,1)
+plot(mass_flux4_qNH3_avg, pres_avg, label = r'$(w\rho)_4$ 1st Anomaly')
+plot(mass_flux5_qNH3_avg, pres_avg, label = r'$(w\rho)_5$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qNH_3$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_qNH3_anomaly.png', bbox_inches = 'tight')
+close()
 
 #Moving Average of Mass Flux
 N = 5 #5 point moving average
@@ -329,6 +408,40 @@ dwrhodz4 = (mass_flux4_avg[1:] - mass_flux4_avg[:-1])/(x1[1:] - x1[:-1])
 mass_flux5_avg = uniform_filter1d(mass_flux5_avg, size=N)
 dwrhodz5 = (mass_flux5_avg[1:] - mass_flux5_avg[:-1])/(x1[1:] - x1[:-1])
 
+#Moving Average of Mass Flux
+
+mass_flux1_qH2O_avg = uniform_filter1d(mass_flux1_qH2O_avg, size=N)
+dwqH2Odz1 = (mass_flux1_qH2O_avg[1:] - mass_flux1_qH2O_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux2_qH2O_avg = uniform_filter1d(mass_flux2_qH2O_avg, size=N)
+dwqH2Odz2 = (mass_flux2_qH2O_avg[1:] - mass_flux2_qH2O_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux3_qH2O_avg = uniform_filter1d(mass_flux3_qH2O_avg, size=N)
+dwqH2Odz3 = (mass_flux3_qH2O_avg[1:] - mass_flux3_qH2O_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux4_qH2O_avg = uniform_filter1d(mass_flux4_qH2O_avg, size=N)
+dwqH2Odz4 = (mass_flux4_qH2O_avg[1:] - mass_flux4_qH2O_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux5_qH2O_avg = uniform_filter1d(mass_flux5_qH2O_avg, size=N)
+dwqH2Odz5 = (mass_flux5_qH2O_avg[1:] - mass_flux5_qH2O_avg[:-1])/(x1[1:] - x1[:-1])
+
+#Moving Average of Mass Flux
+
+mass_flux1_qNH3_avg = uniform_filter1d(mass_flux1_qNH3_avg, size=N)
+dwqNH3dz1 = (mass_flux1_qNH3_avg[1:] - mass_flux1_qNH3_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux2_qNH3_avg = uniform_filter1d(mass_flux2_qNH3_avg, size=N)
+dwqNH3dz2 = (mass_flux2_qNH3_avg[1:] - mass_flux2_qNH3_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux3_qNH3_avg = uniform_filter1d(mass_flux3_qNH3_avg, size=N)
+dwqNH3dz3 = (mass_flux3_qNH3_avg[1:] - mass_flux3_qNH3_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux4_qNH3_avg = uniform_filter1d(mass_flux4_qNH3_avg, size=N)
+dwqNH3dz4 = (mass_flux4_qNH3_avg[1:] - mass_flux4_qNH3_avg[:-1])/(x1[1:] - x1[:-1])
+
+mass_flux5_qNH3_avg = uniform_filter1d(mass_flux5_qNH3_avg, size=N)
+dwqNH3dz5 = (mass_flux5_qNH3_avg[1:] - mass_flux5_qNH3_avg[:-1])/(x1[1:] - x1[:-1])
+
 #plotting the vertical mass flux
 fig,ax= subplots(1,1)
 plot(mass_flux1_avg, pres_avg, label = r'$(w\rho)_1$')
@@ -340,6 +453,7 @@ ax.set_yscale('log')
 ax.set_ylim(max(pres_avg),min(pres_avg))
 legend()
 savefig('mass_flux_mvavg.png', bbox_inches = 'tight')
+close()
 
 #plotting the vertical mass flux Anomalies
 fig,ax= subplots(1,1)
@@ -351,6 +465,55 @@ ax.set_yscale('log')
 ax.set_ylim(max(pres_avg),min(pres_avg))
 legend()
 savefig('mass_flux_mvavg_anomaly.png', bbox_inches = 'tight')
+close()
+
+#plotting the vertical mass flux H2O
+fig,ax= subplots(1,1)
+plot(mass_flux1_qH2O_avg, pres_avg, label = r'$(w\cdot qH_2O)_1$')
+plot(mass_flux2_qH2O_avg, pres_avg, label = r'$(w\cdot qH_2O)_2$')
+plot(mass_flux3_qH2O_avg, pres_avg, label = r'$(w\cdot qH_2O)_3$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qH_2O$($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_qH2O_mvavg.png', bbox_inches = 'tight')
+
+
+#plotting the vertical H2O mass flux Anomalies
+fig,ax= subplots(1,1)
+plot(mass_flux4_qH2O_avg, pres_avg, label = r'$(w\cdot qH_2O)_4$ 1st Anomaly')
+plot(mass_flux5_qH2O_avg, pres_avg, label = r'$(w\cdot qH_2O)_5$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qH_2O$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+savefig('mass_flux_qH2Omvavg.png', bbox_inches = 'tight')
+legend()
+
+#plotting the vertical mass flux NH3
+fig,ax= subplots(1,1)
+plot(mass_flux1_qNH3_avg, pres_avg, label = r'$(w\cdot qNH_3)_1$')
+plot(mass_flux2_qNH3_avg, pres_avg, label = r'$(w\cdot qNH_3)_2$')
+plot(mass_flux3_qNH3_avg, pres_avg, label = r'$(w\cdot qNH_3)_3$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qNH_3$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+legend()
+savefig('mass_flux_qNH3_mvavg.png', bbox_inches = 'tight')
+
+
+#plotting the vertical NH3 mass flux Anomalies
+fig,ax= subplots(1,1)
+plot(mass_flux4_qNH3_avg, pres_avg, label = r'$(w \cdot qNH_3)_4$ 1st Anomaly')
+plot(mass_flux5_qNH3_avg, pres_avg, label = r'$(w\cdot qNH_3)_5$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_xlabel(r'Mass Flux $qNH_3$ ($\frac{kg}{s \cdot m^2}$)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+savefig('mass_flux_qNH3_mvavg.png', bbox_inches = 'tight')
+legend()
 
 pres_avg2 = sqrt(pres_avg[1:]*pres_avg[:-1])
 
@@ -379,6 +542,48 @@ ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
 axvline(x = 0, linestyle = '--', color = 'black')
 legend()
 savefig('dwrhodt_mvavg.png', bbox_inches = 'tight')
+close()
+
+fig,ax= subplots(1,1)
+plot(-1*dwqH2Odz1,pres_avg2,label = r'$\frac{-d(w\cdot qH_2O)_1}{dz}$')
+plot(-1*dwqH2Odz2,pres_avg2,label = r'$\frac{-d(w\cdot qH_2O)_2}{dz}$')
+plot(-1*dwqH2Odz3,pres_avg2,label = r'$\frac{-d(w\cdot qH_2O)_3}{dz}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg2),min(pres_avg2))
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwqH2Odz_mvavg.png', bbox_inches = 'tight')
+
+
+fig,ax= subplots(1,1)
+plot(-1*dwqNH3dz1,pres_avg2,label = r'$\frac{-d(w\cdot qNH_3)_1}{dz}$')
+plot(-1*dwqNH3dz2,pres_avg2,label = r'$\frac{-d(w\cdot qNH_3)_2}{dz}$')
+plot(-1*dwqNH3dz3,pres_avg2,label = r'$\frac{-d(w\cdot qNH_3)_3}{dz}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg2),min(pres_avg2))
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwqNH3dz_mvavg.png', bbox_inches = 'tight')
 
 fig,ax= subplots(1,1)
 plot(-1*dwrhodz4,pres_avg2,label = r'$\frac{-d(w \rho)_4}{dz}$ 1st Anomaly')
@@ -398,6 +603,45 @@ ax.set_ylim(max(pres_avg2),min(pres_avg2))
 axvline(x = 0, linestyle = '--', color = 'black')
 legend()
 savefig('dwrhodt_mvavg_anomaly.png', bbox_inches = 'tight')
+close()
+
+fig,ax= subplots(1,1)
+plot(-1*dwqH2Odz4,pres_avg2,label = r'$\frac{-d(w \cdot qH_2O)_4}{dz}$ 1st Anomaly')
+plot(-1*dwqH2Odz5,pres_avg2,label = r'$\frac{-d(w \cdot qH_2O)_5}{dz}$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg2),min(pres_avg2))
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwrhodt_mvavg_qH2O_anomaly.png', bbox_inches = 'tight')
+
+fig,ax= subplots(1,1)
+plot(-1*dwqNH3dz4,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_4}{dz}$ 1st Anomaly')
+plot(-1*dwqNH3dz5,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_5}{dz}$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg2),min(pres_avg2))
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwrhodt_mvavg_qNH3_anomaly.png', bbox_inches = 'tight')
 
 fig,ax= subplots(1,1)
 plot(-1*dwrhodz1,pres_avg2,label = r'$\frac{-d(w \rho)_1}{dz}$')
@@ -421,6 +665,55 @@ ax.set_ylim(max(pres_avg),min(pres_avg))
 axvline(x = 0, linestyle = '--', color = 'black')
 legend()
 savefig('dwrhodt_mvavg_compare.png', bbox_inches = 'tight')
+close()
+
+fig,ax= subplots(1,1)
+plot(-1*dwqH2Odz1,pres_avg2,label = r'$\frac{-d(w \cdot H_2O)_1}{dz}$')
+plot(-1*dwqH2Odz2,pres_avg2,label = r'$\frac{-d(w \cdot H_2O)_2}{dz}$')
+plot(-1*dwqH2Odz3,pres_avg2,label = r'$\frac{-d(w \cdot H_2O)_3}{dz}$')
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+plot(alpha1,pres_avg, label = r'$\frac{d(qH_2O)_1}{dt}$')
+plot(alpha2,pres_avg, label = r'$\frac{d(qH_2O)_2}{dt}$')
+plot(alpha3,pres_avg, label = r'$\frac{d(qH_2O)_3}{dt}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwqH2Odt_mvavg_compare.png', bbox_inches = 'tight')
+close()
+
+fig,ax= subplots(1,1)
+plot(-1*dwqNH3dz1,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_1}{dz}$')
+plot(-1*dwqNH3dz2,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_2}{dz}$')
+plot(-1*dwqNH3dz3,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_3}{dz}$')
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+plot(eta1,pres_avg, label = r'$\frac{d(qNH_3)_1}{dt}$')
+plot(eta2,pres_avg, label = r'$\frac{d(qNH_3)_2}{dt}$')
+plot(eta3,pres_avg, label = r'$\frac{d(qNH_3)_3}{dt}$')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwqNH3dt_mvavg_compare.png', bbox_inches = 'tight')
+close()
 
 fig,ax= subplots(1,1)
 plot(-1*dwrhodz4,pres_avg2,label = r'$\frac{-d(w \rho)_4}{dz}$ 1st Anomaly')
@@ -442,5 +735,49 @@ ax.set_ylim(max(pres_avg),min(pres_avg))
 axvline(x = 0, linestyle = '--', color = 'black')
 legend()
 savefig('dwrhodt_mvavg_compare_anomaly.png', bbox_inches = 'tight')
+close()
+
+fig,ax= subplots(1,1)
+plot(-1*dwqH2Odz4,pres_avg2,label = r'$\frac{-d(w \dot H_2O)_4}{dz}$ 1st Anomaly')
+plot(-1*dwqH2Odz5,pres_avg2,label = r'$\frac{-d(w \dot H_2O)_5}{dz}$ 2nd Anomaly')
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+plot(alpha4,pres_avg, label = r'$\frac{d(qH_2O)_4}{dt}$ 1st Anomaly')
+plot(alpha5,pres_avg, label = r'$\frac{d(qH_2O)_5}{dt}$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwqH2Odt_mvavg_compare_anomaly.png', bbox_inches = 'tight')
+
+fig,ax= subplots(1,1)
+plot(-1*dwqNH3dz4,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_4}{dz}$ 1st Anomaly')
+plot(-1*dwqNH3dz5,pres_avg2,label = r'$\frac{-d(w \cdot qNH_3)_5}{dz}$ 2nd Anomaly')
+
+#axhline(y1, linestyle = '-', color = 'black')
+#axhline(y2, linestyle = '-', color = 'black')
+#ax.axhspan(y1, y2, facecolor='yellow', alpha=0.4)
+
+#axhline(y3, linestyle = '-', color = 'black')
+#axhline(y4, linestyle = '-', color = 'black')
+#ax.axhspan(y3, y4, facecolor='yellow', alpha=0.4)
+
+plot(eta4,pres_avg, label = r'$\frac{d(qNH_3)_4}{dt}$ 1st Anomaly')
+plot(eta5,pres_avg, label = r'$\frac{d(qNH_3)_5}{dt}$ 2nd Anomaly')
+ax.set_ylabel('Pressure (Pascals)',fontsize = 12)
+ax.set_yscale('log')
+ax.set_ylim(max(pres_avg),min(pres_avg))
+axvline(x = 0, linestyle = '--', color = 'black')
+legend()
+savefig('dwqNH3dt_mvavg_compare_anomaly.png', bbox_inches = 'tight')
+
 
 show();
