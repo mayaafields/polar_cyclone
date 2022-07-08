@@ -3,7 +3,9 @@ from pylab import *
 from netCDF4 import Dataset
 
 # Retrieving Data from the nc files
-fname = '/home/mafields/CylconeDiagnostics/data/jupiter2d-long-main.nc'
+
+fname = '/home/mafields/CylconeDiagnostics/jupiter_runs/jupiter_modelruns/150622_1000_64256_c16_1e5/jupiter-main.nc'
+#fname = '/home/mafields/CylconeDiagnostics/data/jupiter2d-long-main.nc'
 data = Dataset(fname, 'r')
 
 # Defining Variables
@@ -74,7 +76,7 @@ ax.set_ylabel('Pressure',fontsize = 12)
 ax.set_ylim(max(p_avg), 10**6)
 ax.set_yscale('log')
 fig.colorbar(h)
-savefig('contour_plot_tempa_deep.png', bbox_inches = 'tight')
+savefig('contour_plot_tempa_deep_01.png', bbox_inches = 'tight')
 
 fig,ax=subplots(1,1)
 
@@ -85,7 +87,7 @@ ax.set_ylabel('Pressure',fontsize = 12)
 ax.set_ylim(max(p_avg), 10**6)
 ax.set_yscale('log')
 fig.colorbar(h)
-savefig('contour_plot_qH2Oa2_deep.png',bbox_inches = 'tight')
+savefig('contour_plot_qH2Oa2_deep_01.png',bbox_inches = 'tight')
 
 fig,ax=subplots(1,1)
 
@@ -96,7 +98,7 @@ ax.set_ylabel('Pressure',fontsize = 12)
 ax.set_ylim(max(p_avg), 10**6)
 ax.set_yscale('log')
 fig.colorbar(h)
-savefig('contour_plot_qNH3a2_deep.png', bbox_inches = 'tight')
+savefig('contour_plot_qNH3a2_deep_01.png', bbox_inches = 'tight')
 
 fig,ax=subplots(1,1)
 h = ax.contourf(time, pres, kinetic_energy[:,:,0])
@@ -106,6 +108,6 @@ ax.set_ylabel('Pressure',fontsize = 12)
 ax.set_ylim(max(p_avg), min(p_avg))
 ax.set_yscale('log')
 fig.colorbar(h)
-savefig('contour_plot_KE.png',bbox_inches = 'tight')
+savefig('contour_plot_KE_01.png',bbox_inches = 'tight')
 
 show()
